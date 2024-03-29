@@ -49,6 +49,5 @@ po/*~
 rsconnect/
 
 # Ignore unused files for manuscript
-scripts/artifact-types.R
-scripts/study-area-characteristics.R
-scripts/weathering-artifact-size.R
+scripts/unused-scripts
+data/all-artifact-data
