@@ -1,4 +1,6 @@
 library(tidyverse)
+library(ggthemes)
+library(ggpubr)
 library(rcompanion)
 
 theme_set(theme_bw())
@@ -146,10 +148,10 @@ mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw"),
   geom_boxplot() +
   stat_compare_means(method = "anova", label.x.npc = "center", vjust = 2) +
   #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right") +
+  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 2) +
   scale_x_discrete(labels = w.labs) +
   labs(x = "degree of weathering", color = "weathering class") +
-  theme(legend.position = "none") +
+  theme(legend.position = "none", panel.spacing.x = unit(5, "lines")) +
   scale_color_brewer(palette = "Set1")
 plot(mwplot1)
 
@@ -168,7 +170,7 @@ plot(mwplot2)
 
 ggsave(plot = mwplot1,
        filename = "figures/mw-comparisons_wc.tiff",
-       dpi = 300, width = 9, height = 5.5)
+       dpi = 300, width = 8, height = 7)
 
 
 ggsave(plot = mwplot2,

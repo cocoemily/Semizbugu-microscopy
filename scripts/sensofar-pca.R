@@ -100,12 +100,14 @@ five.clust = fviz_pca_biplot(prcomp(z, scale = T), habillage = mw_measures$clust
                 addEllipses = T, ellipse.type = "convex", label = "var", 
                 repel = T, title = "")  +
   geom_text_repel(aes(label = mw_measures$clean_wc[,1]), size = 2) +
-  geom_text_repel(aes(label = mw_measures$Id_number), size = 2) +
+  #geom_text_repel(aes(label = mw_measures$Id_number), size = 2) +
   #guides(color = "none", fill = "none", shape = "none") +
   theme_bw() 
 plot(five.clust)
 
-biplots = ggarrange(three.clust, five.clust, nrow = T, labels = "AUTO")
+biplots = ggarrange(three.clust, NULL, five.clust, 
+                    nrow = 1, labels = c("A", "", "B"), 
+                    widths = c(1, 0.25, 1))
 plot(biplots)
 
 ggsave("figures/pca-biplots-clusters.tiff", biplots, 
