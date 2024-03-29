@@ -47,3 +47,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Ignore unused files for manuscript
+scripts/artifact-types.R
+scripts/study-area-characteristics.R
+scripts/weathering-artifact-size.R
