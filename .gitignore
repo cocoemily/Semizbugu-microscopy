@@ -51,3 +51,4 @@ rsconnect/
 # Ignore unused files for manuscript
 scripts/unused-scripts
 data/all-artifact-data
+figures/old-figures

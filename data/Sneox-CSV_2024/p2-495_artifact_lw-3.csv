@@ -1,0 +1,19 @@
+[25] Parameters table: p2-495_artifact_lw-3 - ... - Thresholded (0.0408214 % ; 99.9022 %)
+Z:\Sensofar Projects\Emily_2024\p2-495_artifact_lw-3.mnt
+2024/08/14,16:19:47
+
+Name,Value,Unit,Context,Frame Number,Studiable name,
+Spc,8.587803566,1/µm,pruning = 5%,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Spd,0.009242715994,1/µm²,pruning = 5%,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+S5v,15.43484,µm,pruning = 5%,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sq,2.358200793,µm,,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sp,14.65933,µm,,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sv,16.38121,µm,,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sa,1.64311441,µm,,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Ssk,-1.123561971,<no unit>,,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sal,29.68367367,µm,s = 0.2,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Sk,3.443348467,µm,Gaussian filter  0.25 mm,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Spk,2.030084395,µm,Gaussian filter  0.25 mm,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Smr1,9.64790186,%,Gaussian filter  0.25 mm,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Smr2,85.68151161,%,Gaussian filter  0.25 mm,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),
+Vvv,0.4178448711,µm³/µm²,p = 80%,25,p2-495_artifact_lw-3 > Topography layer > Waviness (Gaussian filter, 1.09300 µm) > Form removed (Polynomial of degree 3) > Roughness (Gaussian filter, 327.980 µm) > Thresholded (0.0408214 % ; 99.9022 %),

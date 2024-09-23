@@ -1,30 +1,27 @@
 library(tidyverse)
 library(ggthemes)
 library(ggpubr)
+library(ggprism)
 library(rcompanion)
+library(paletteer)
+library(rstatix)
 
 theme_set(theme_bw())
 
-source("scripts/get-sneox-data.R")
-
-plotNormalHistogram(sensofar.data$Sq)
-plotNormalHistogram(sensofar.data$Spc)
-plotNormalHistogram(sensofar.data$Smr2)
-
+source("scripts/get-sneox-2024-data.R")
+rm(list = setdiff(ls(), "sensofar.data"))
+parameters = colnames(sensofar.data[,6:19])
 
 sdata = sensofar.data  %>%
-  pivot_longer(cols = 6:18, names_to = "measurement", values_to = "value")
-
+  pivot_longer(cols = 6:19, names_to = "measurement", values_to = "value")
 sdata$Weathering_class = factor(sdata$Weathering_class, 
                                 levels = c("strongly_weathered", "mildly_weathered", "weakly_weathered"))
 
 
 ####order artifacts by values####
-parameters = colnames(sensofar.data[,6:18])
-
 plot_by_param_value = function(param) {
   new = sensofar.data  %>% 
-    mutate(new_Id = paste0(Id_number, "_", sample_number)) %>% 
+    mutate(new_Id = paste0(Id_number, "_", measurement_number)) %>% 
     filter(surface_class == "mw") %>%
     select_at(c("new_Id", "Weathering_class", param))
   
@@ -65,6 +62,7 @@ ggplot(sdata,
 compare_means(value ~ wc2, group.by = "measurement", data = sdata, p.adjust.method = "bonferroni")
 
 
+
 w.labs = c("strongly", "mildly", "weakly")
 names(w.labs) = c("strongly_weathered", "mildly_weathered", "weakly_weathered")
 
@@ -76,19 +74,19 @@ wc.all = compare_means(value ~ Weathering_class, group.by = "measurement",
                        data = sdata, 
                        method = "anova")
 ####mw-lw comparison####
-test.stats = compare_means(value ~ surface_class, group.by = c("Weathering_class", "measurement"), 
-                           data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v")), 
-                           paired = T) %>%
-  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v")), by = c("measurement", "Weathering_class")) %>%
+all.stats = compare_means(value ~ surface_class, group.by = c("Weathering_class", "measurement"), 
+                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                          paired = T) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("measurement", "Weathering_class")) %>%
   group_by(Weathering_class, measurement) %>%
   summarize(p.format = first(p.format), 
             max.y = max(value))
 
-ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v"))) +
+all.mw.lw.wc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))) +
   geom_boxplot(aes(x = Weathering_class, y = value, 
                    group = interaction(surface_class, Weathering_class), 
                    color = interaction(surface_class, Weathering_class))) +
-  geom_text(data = test.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v")), 
+  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
             mapping = aes(x = Weathering_class, y = max.y,label = paste0("p = ", p.format)),
             nudge_y = 0.5) +
   facet_wrap(~fct_rev(measurement), scales = "free", strip.position = "right", ncol = 1) +
@@ -96,57 +94,58 @@ ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v"))) 
   labs(x = "degree of weathering", color = "weathering class") +
   theme(legend.position = "none") +
   scale_color_brewer(palette = "Paired")
+plot(all.mw.lw.wc)
 
-all_plot1 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Smr2"))) +
-  geom_boxplot(aes(x = Weathering_class, y = value, 
-                   group = interaction(surface_class, Weathering_class), 
-                   color = interaction(surface_class, Weathering_class))) +
-  geom_text(data = test.stats %>% filter(measurement %in% c("Sq", "Smr2")), 
-            mapping = aes(x = Weathering_class, y = max.y,label = paste0("p = ", p.format)),
+# ggsave(plot = all.mw.lw.wc,
+#        filename = "figures/mw-lw-comparisons_wc.tiff",
+#        dpi = 300, width = 5, height = 8)
+
+all.stats2 = compare_means(value ~ surface_class, group.by = c("location", "measurement"), 
+                           data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                           paired = T) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("measurement", "location")) %>%
+  group_by(location, measurement) %>%
+  summarize(p.format = first(p.format), 
+            max.y = max(value))
+
+all.mw.lw.loc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))) +
+  geom_boxplot(aes(x = location, y = value, 
+                   group = interaction(surface_class, location), 
+                   color = interaction(surface_class, location))) +
+  geom_text(data = all.stats2 %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+            mapping = aes(x = location, y = max.y,label = paste0("p = ", p.format)),
             nudge_y = 0.5) +
   facet_wrap(~fct_rev(measurement), scales = "free", strip.position = "right", ncol = 1) +
   scale_x_discrete(labels = w.labs) +
-  labs(x = "degree of weathering", color = "weathering class") +
+  labs(x = "location", color = "weathering class") +
   theme(legend.position = "none") +
-  scale_color_brewer(palette = "Paired")
-plot(all_plot1)
+  scale_color_paletteer_d("ggthemes::Summer", direction = -1)
+plot(all.mw.lw.loc)
 
-ggsave(plot = all_plot1,
-       filename = "figures/mw-lw-comparisons_wc.tiff",
-       dpi = 300, width = 5, height = 6)
+# ggsave(plot = all.mw.lw.loc,
+#        filename = "figures/mw-lw-comparisons_loc.tiff",
+#        dpi = 300, width = 5, height = 8)
 
-
-# all_plot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2"))) +
-#   geom_boxplot(aes(x = location, y = value, 
-#                    group = interaction(surface_class, location), 
-#                    color = interaction(surface_class, location))) +
-#   #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
-#   facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 1) +
-#   #scale_x_discrete(labels = c("strongly", "mildly", "weakly")) +
-#   labs(x = "location", color = "weathering class") +
-#   theme(legend.position = "none") +
-#   scale_color_paletteer_d("ggthemes::Summer", direction = -1)
-# #plot(all_plot2)
-# 
-# test.stats2 = compare_means(value ~ surface_class, group.by = c("location", "measurement"), 
-#                            data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2")), 
-#                            paired = T)
-
-# ggsave(plot = ggarrange(all_plot1, all_plot2,ncol = 2,labels = "AUTO"), 
-#        filename = "figures/base-measure-comparisons_V2.tiff", 
-#        dpi = 300, width = 10, height = 9)
 
 ##### weathered surface comparison ####
-sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v"))
+sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
 sdata.sub$measurement = factor(sdata.sub$measurement, 
-                               levels = c("Sq", "Spc", "Smr2", "Ssk", "S5v"))
+                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+
+table((sensofar.data %>% filter(surface_class == "mw"))$Weathering_class)
+table((sensofar.data %>% filter(surface_class == "mw"))$location)
 
 mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw"), 
                  aes(x = Weathering_class, y = value, 
                      group = Weathering_class, 
                      color = Weathering_class)) +
   geom_boxplot() +
-  stat_compare_means(method = "anova", label.x.npc = "center", vjust = 2) +
+  stat_compare_means(method = "wilcox.test", comparisons = list( 
+    c("strongly_weathered", "mildly_weathered"), 
+    c("strongly_weathered", "weakly_weathered"), 
+    c("mildly_weathered", "weakly_weathered")),
+    label.x.npc = "center", vjust = 0.6, #hjust = 1, 
+    label = "p.signif", hide.ns = T) +
   #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
   facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 2) +
   scale_x_discrete(labels = w.labs) +
@@ -155,121 +154,127 @@ mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw"),
   scale_color_brewer(palette = "Set1")
 plot(mwplot1)
 
-mwplot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "S5v")) %>% filter(surface_class == "mw"), 
+mwplot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>% filter(surface_class == "mw"), 
                  aes(x = location, y = value, 
                      group = location, 
                      color = location)) +
   geom_boxplot() +
-  stat_compare_means(method = "anova", label.x.npc = "center", vjust = 2) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 1) +
-  labs(x = "location") +
-  theme(legend.position = "none") +
+  stat_compare_means(method = "anova", label.x.npc = "center", vjust = 1, hjust = 1) +
+  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 2) +
+  labs(x = "location")  +
+  theme(legend.position = "none", panel.spacing.x = unit(5, "lines"), 
+        axis.text.x = element_text(size = 7)) +
   scale_color_brewer(palette = "Dark2")
 plot(mwplot2)
-
 
 ggsave(plot = mwplot1,
        filename = "figures/mw-comparisons_wc.tiff",
        dpi = 300, width = 8, height = 7)
-
-
 ggsave(plot = mwplot2,
        filename = "figures/mw-comparisons_loc.tiff",
-       dpi = 300, width = 5, height = 9)
-
-# ggsave(plot = ggarrange(mwplot1, mwplot2,ncol = 2,labels = "AUTO"),
-#        filename = "figures/mw-comparisons.tiff",
-#        dpi = 300, width = 10, height = 9)
-
-######abrasion parameters####
-ggplot(sdata %>% filter(measurement %in% c("Sk", "Spk"))) +
-  geom_boxplot(aes(x = Weathering_class, y = value, 
-                   group = interaction(surface_class, Weathering_class), 
-                   color = interaction(surface_class, Weathering_class))) +
-  #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 1) +
-  scale_x_discrete(labels = c("strongly", "mildly", "weakly")) +
-  labs(x = "degree of weathering", color = "weathering class") +
-  theme(legend.position = "bottom") +
-  scale_color_brewer(palette = "Paired")
-
-######feature height#####
-ggplot(sdata %>% filter(measurement %in% c("Sp", "Sv"))) +
-  geom_boxplot(aes(x = Weathering_class, y = value, 
-                   group = interaction(surface_class, Weathering_class), 
-                   color = interaction(surface_class, Weathering_class))) +
-  #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 1) +
-  scale_x_discrete(labels = c("strongly", "mildly", "weakly")) +
-  labs(x = "degree of weathering", color = "weathering class") +
-  theme(legend.position = "bottom") +
-  scale_color_brewer(palette = "Paired")
-
-
+       dpi = 300, width = 8, height = 7)
 
 ####by artifact####
-art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2"))
-#art.comp$measurement = factor(art.comp$measurement, levels = c("Sq", "Spd", "Spc"))
-art.comp$new_Id = paste0(art.comp$Id_number, "_", art.comp$sample_number)
-art.comp$new_Id = factor(art.comp$new_Id, 
-                         levels = c("83_002", "495_002", "1777_003", "1962_001", "1962_002", "survey_002", "survey_003",
-                                    "791_002","1556_002", "1556_003", "1843_003", "1843_004",  
-                                    "231_002", "336_002"))
+art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>%
+  mutate(measurement_id = paste0(Id_number, "_", measurement_number))
+
+art.comp$Id_number = factor(art.comp$Id_number,
+                            levels = c("83", "231", "336","495", 
+                                       "791",
+                                       "1556", "1777" , "1843", "1962",
+                                       "survey"))
+art.comp$measurement = factor(art.comp$measurement , 
+         levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+
+all.stats = compare_means(value ~ surface_class, group.by = c("Id_number", "Weathering_class", "measurement"), 
+                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                          paired = F) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("Id_number", "measurement", "Weathering_class")) %>%
+  #filter(surface_class == "mw") %>%
+  group_by(Id_number, Weathering_class, measurement) %>%
+  summarize(p.format = first(p.format), 
+            p.signif = first(p.signif),
+            max.y = max(value))
+
+all.stats$measurement = factor(all.stats$measurement, 
+                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
 
 point.comp = ggplot(art.comp) +
-  geom_line(aes(x = new_Id, y = value, group = new_Id, color = Weathering_class)) +
-  geom_point(aes(x = new_Id, y = value, group = new_Id, color = Weathering_class, shape = surface_class), size = 2) +
-  facet_wrap( ~ fct_rev(measurement), scales = "free", ncol = 1, strip.position = "right") +
-  # geom_bracket(xmin = "83_002", xmax = "survey_003", y.position = 0, label = "strongly", 
-  #              tip.length = 0, label.size = 3, vjust = 1.5) +
-  # geom_bracket(xmin = "791_002", xmax = "1843_004", y.position = 0, label = "mildly", 
-  #              tip.length = 0, label.size = 3, vjust = 1.5) +
-  # geom_bracket(xmin = "231_002", xmax = "336_002", y.position = 0, label = "weakly", 
-  #              tip.length = 0, label.size = 3, vjust = 1.5) +
-  guides(color = "none") +
-  labs(shape = "") +
-  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),
+  geom_boxplot(aes(x = Id_number, y = value, group = interaction(Id_number, surface_class), fill = interaction(surface_class, Weathering_class)), position = "dodge2") +
+  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>% filter(p.signif != "ns"), 
+            mapping = aes(x = Id_number, y = max.y, label = p.signif)) +
+  facet_wrap( ~ measurement, scales = "free", ncol = 1, strip.position = "right") +
+  guides(color = "none", fill = "none") +
+  theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  scale_shape_manual(values = c(15, 16), labels = c("less weathered surface", "more weathered surface")) +
-  scale_color_brewer(palette = "Set1")
+        legend.position = "bottom", 
+        panel.spacing.y = unit(1.5, "lines")) +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired")
 plot(point.comp)
 
 ggsave(
   point.comp, 
-  filename = "figures/mw-lw-comparisons_weathering-class_V2.tiff", 
-  dpi = 300, width = 5, height = 9
+  filename = "figures/mw-lw-comparisons_V2.tiff", 
+  dpi = 300, width = 7, height = 9
 )
 
-art.comp$new_Id = factor(art.comp$new_Id, 
-                         levels = c("83_002", "231_002", "336_002","495_002", 
-                                    "791_002",
-                                    "1556_002", "1556_003", "1777_003" , "1843_003", "1843_004","1962_001", "1962_002", 
-                                    "survey_002", "survey_003"))
 
-point.comp2 = ggplot(art.comp) +
-  geom_line(aes(x = new_Id, y = value, group = new_Id, color = location)) +
-  geom_point(aes(x = new_Id, y = value, group = new_Id, color = location, shape = surface_class), size = 2) +
-  facet_wrap( ~ measurement, scales = "free", ncol = 1, strip.position = "right") +
-  geom_bracket(xmin = "83_002", xmax = "495_002", y.position = 0, label = "P1", 
-               tip.length = 0, label.size = 3, vjust = 1.5) +
-  geom_bracket(xmin = "791_002", xmax = "791_002", y.position = 0, label = "P2", 
-               tip.length = 0, label.size = 3, vjust = 1.5) +
-  geom_bracket(xmin = "1556_002", xmax = "1962_002", y.position = 0, label = "P5", 
-               tip.length = 0, label.size = 3, vjust = 1.5) +
-  geom_bracket(xmin = "survey_002", xmax = "survey_003", y.position = 0, label = "survey", 
-               tip.length = 0, label.size = 3, vjust = 1.5) +
-  guides(color = "none") +
-  labs(shape = "") +
-  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  scale_shape_manual(values = c(15, 16), labels = c("less weathered surface", "more weathered surface")) +
-  scale_color_brewer(palette = "Dark2")
-plot(point.comp2)
-
-ggsave(
-  point.comp2, 
-  filename = "figures/mw-lw-comparisons_location_V2.tiff", 
-  dpi = 300, width = 5, height = 9
+#### comparison while accounting for variation within subject ####
+sensofar.data$measurement_id = paste0(
+  sensofar.data$Id_number, "-", 
+  sensofar.data$measurement_number, "_",
+  sensofar.data$surface_class
 )
+sensofar.data$Id_number = as.factor(sensofar.data$Id_number)
+sensofar.data$surface_class = as.factor(sensofar.data$surface_class)
+sensofar.data$Weathering_class = as.factor(sensofar.data$Weathering_class)
+
+plotNormalHistogram(sensofar.data$Spc)
+model = lmer(Spc ~ surface_class * Weathering_class * location + (1 | Id_number), data = sensofar.data)
+summary(aov(Spc ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Spc, wid = measurement_number, 
+#            between = surface_class, within = Id_number)
+spc.comp = sensofar.data %>%
+  group_by(Weathering_class, Id_number) %>%
+  pairwise_t_test(Spc ~ surface_class, p.adjust.method = "bonferroni") %>%
+  select(-n1, -n2)
+
+plotNormalHistogram(sensofar.data$Sq)
+summary(aov(Sq ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Sq, wid = measurement_number, 
+#            between = surface_class, within = Id_number)
+sq.comp = sensofar.data %>%
+  group_by(Weathering_class, Id_number) %>%
+  pairwise_t_test(Sq ~ surface_class, p.adjust.method = "bonferroni") %>%
+  select(-n1, -n2)
+
+plotNormalHistogram(sensofar.data$Ssk)
+summary(aov(Ssk ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Ssk, wid = measurement_number, 
+#            between = surface_class, within = Id_number)
+ssk.comp = sensofar.data %>%
+  group_by(Weathering_class, Id_number) %>%
+  pairwise_t_test(Ssk ~ surface_class, p.adjust.method = "bonferroni") %>%
+  select(-n1, -n2)
+
+plotNormalHistogram(sensofar.data$Smr2)
+summary(aov(Smr2 ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Smr2, wid = measurement_number, 
+#            between = surface_class, within = Id_number)
+smr2.comp = sensofar.data %>%
+  group_by(Weathering_class, Id_number) %>%
+  pairwise_t_test(Smr2 ~ surface_class, p.adjust.method = "bonferroni") %>%
+  select(-n1, -n2)
+
+plotNormalHistogram(sensofar.data$Vvv)
+summary(aov(Vvv ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Vvv, wid = measurement_number, 
+#            between = surface_class, within = Id_number)
+vvv.comp = sensofar.data %>%
+  group_by(Weathering_class, Id_number) %>%
+  pairwise_t_test(Vvv ~ surface_class, p.adjust.method = "bonferroni") %>%
+  select(-n1, -n2)
+
+
+
