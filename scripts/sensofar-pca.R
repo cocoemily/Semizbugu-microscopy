@@ -17,6 +17,9 @@ library(ggrepel)
 theme_set(theme_bw())
 
 source("scripts/get-sneox-2024-data.R")
+rm(list = setdiff(ls(), "sensofar.data"))
+
+sensofar.data = sensofar.data %>% filter(location != "survey")
 
 mw_measures = sensofar.data %>% filter(surface_class == "mw")
 lw_measures = sensofar.data %>% filter(surface_class == "lw")
@@ -25,13 +28,13 @@ lw_measures = sensofar.data %>% filter(surface_class == "lw")
 norm.mw = scale(mw_measures[,6:19])
 corr_mat = cor(norm.mw)
 p.mat = cor_pmat(norm.mw)
-ggcorrplot(corr_mat, type = "lower", 
+ggcorrplot(corr_mat, type = "upper", 
            p.mat = p.mat, insig = "blank")
 
 norm.lw = scale(lw_measures[,6:19])
 lw.corr_mat = cor(norm.lw)
 p.mat.lw = cor_pmat(norm.lw)
-ggcorrplot(lw.corr_mat, type = "lower", 
+ggcorrplot(lw.corr_mat, type = "upper", 
            p.mat = p.mat.lw, insig = "blank")
 
 # mw.pca2 = prcomp(mw_measures %>% select(
@@ -108,35 +111,35 @@ ggsave("figures/pca-biplots-clusters.tiff", biplots,
 get_pca_var(prcomp(z, scale = T))$contrib[,1:2]
 
 
-plot_by_param_value_CLUSTER = function(param) {
-  new = mw_measures  %>% 
-    mutate(new_Id = paste0(Id_number, "_", measurement_number)) %>% 
-    filter(surface_class == "mw") %>%
-    select_at(c("new_Id", "cluster_num2", param))
-  
-  new$new_Id = reorder(new$new_Id, new[,param])
-  
-  return(
-    ggplot(new) +
-      geom_point(aes(x = new_Id, y = !!sym(param), color = as.factor(cluster_num2))) +
-      scale_color_colorblind()
-  )
-  
-}
-
-plot(plot_by_param_value_CLUSTER(parameters[1]))
-plot(plot_by_param_value_CLUSTER(parameters[2]))
-plot(plot_by_param_value_CLUSTER(parameters[3]))
-plot(plot_by_param_value_CLUSTER(parameters[4]))
-plot(plot_by_param_value_CLUSTER(parameters[5]))
-plot(plot_by_param_value_CLUSTER(parameters[6]))
-plot(plot_by_param_value_CLUSTER(parameters[7]))
-plot(plot_by_param_value_CLUSTER(parameters[8]))
-plot(plot_by_param_value_CLUSTER(parameters[9]))
-plot(plot_by_param_value_CLUSTER(parameters[10]))
-plot(plot_by_param_value_CLUSTER(parameters[11]))
-plot(plot_by_param_value_CLUSTER(parameters[12]))
-plot(plot_by_param_value_CLUSTER(parameters[13]))
+# plot_by_param_value_CLUSTER = function(param) {
+#   new = mw_measures  %>% 
+#     mutate(new_Id = paste0(Id_number, "_", measurement_number)) %>% 
+#     filter(surface_class == "mw") %>%
+#     select_at(c("new_Id", "cluster_num2", param))
+#   
+#   new$new_Id = reorder(new$new_Id, new[,param])
+#   
+#   return(
+#     ggplot(new) +
+#       geom_point(aes(x = new_Id, y = !!sym(param), color = as.factor(cluster_num2))) +
+#       scale_color_colorblind()
+#   )
+#   
+# }
+# 
+# plot(plot_by_param_value_CLUSTER(parameters[1]))
+# plot(plot_by_param_value_CLUSTER(parameters[2]))
+# plot(plot_by_param_value_CLUSTER(parameters[3]))
+# plot(plot_by_param_value_CLUSTER(parameters[4]))
+# plot(plot_by_param_value_CLUSTER(parameters[5]))
+# plot(plot_by_param_value_CLUSTER(parameters[6]))
+# plot(plot_by_param_value_CLUSTER(parameters[7]))
+# plot(plot_by_param_value_CLUSTER(parameters[8]))
+# plot(plot_by_param_value_CLUSTER(parameters[9]))
+# plot(plot_by_param_value_CLUSTER(parameters[10]))
+# plot(plot_by_param_value_CLUSTER(parameters[11]))
+# plot(plot_by_param_value_CLUSTER(parameters[12]))
+# plot(plot_by_param_value_CLUSTER(parameters[13]))
 
 
 ####clustering of lw surfaces?####

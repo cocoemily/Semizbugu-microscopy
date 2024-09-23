@@ -31,13 +31,22 @@ param.cov = sensofar.data %>% group_by(Id_number, Weathering_class, surface_clas
 
 ggplot(param.cov) +
   geom_point(aes(x = Id_number, y = CoV, color = surface_class)) +
-  facet_wrap(~parameter)
+  facet_wrap(~parameter) +
+  coord_flip()
+
+pca.cov = ggplot(param.cov %>% filter(parameter %in% c("Sq", "Smr2", "Ssk"))) +
+  geom_col(aes(x = Id_number, y = CoV, fill = surface_class), position = "dodge2") +
+  facet_wrap(~parameter, scales = "free") +
+  coord_flip()
+ggsave(filename = "figures/SM_PCA-parameter-CoV-by-artifact.png", plot = pca.cov, 
+       dpi = 300, width = 8, height = 4)
 
 ggplot(param.cov) +
   geom_boxplot(aes(x = parameter, y = CoV, group = parameter)) +
   geom_boxplot(data=param.cov %>% filter(parameter %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
                aes(x = parameter, y = CoV, group = parameter), color = "red") +
   facet_wrap(~surface_class)
+
 
 
 pvals = psych::corr.test(sensofar.data %>% select_at(parameters))$p

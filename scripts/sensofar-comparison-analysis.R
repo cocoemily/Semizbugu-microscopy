@@ -127,7 +127,7 @@ plot(all.mw.lw.loc)
 #        dpi = 300, width = 5, height = 8)
 
 
-##### weathered surface comparison ####
+#### weathered surface comparison ####
 sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
 sdata.sub$measurement = factor(sdata.sub$measurement, 
                                levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
@@ -135,7 +135,7 @@ sdata.sub$measurement = factor(sdata.sub$measurement,
 table((sensofar.data %>% filter(surface_class == "mw"))$Weathering_class)
 table((sensofar.data %>% filter(surface_class == "mw"))$location)
 
-mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw"), 
+mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw") %>% filter(location != "survey"), 
                  aes(x = Weathering_class, y = value, 
                      group = Weathering_class, 
                      color = Weathering_class)) +
@@ -178,11 +178,19 @@ ggsave(plot = mwplot2,
 art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>%
   mutate(measurement_id = paste0(Id_number, "_", measurement_number))
 
+#order by location
+# art.comp$Id_number = factor(art.comp$Id_number,
+#                             levels = c("83", "231", "336","495", 
+#                                        "791",
+#                                        "1556", "1777" , "1843", "1962",
+#                                        "survey"))
+
+#order by weathering stage
 art.comp$Id_number = factor(art.comp$Id_number,
-                            levels = c("83", "231", "336","495", 
-                                       "791",
-                                       "1556", "1777" , "1843", "1962",
-                                       "survey"))
+                            levels = c("231", "336",
+                                       "791","1556","1843",
+                                       "83","495", "1777", "1962", "survey"))
+
 art.comp$measurement = factor(art.comp$measurement , 
          levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
 
@@ -202,21 +210,23 @@ all.stats$measurement = factor(all.stats$measurement,
 point.comp = ggplot(art.comp) +
   geom_boxplot(aes(x = Id_number, y = value, group = interaction(Id_number, surface_class), fill = interaction(surface_class, Weathering_class)), position = "dodge2") +
   geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>% filter(p.signif != "ns"), 
-            mapping = aes(x = Id_number, y = max.y, label = p.signif)) +
+            mapping = aes(x = Id_number, y = max.y, label = p.signif), size = 6) +
   facet_wrap( ~ measurement, scales = "free", ncol = 1, strip.position = "right") +
   guides(color = "none", fill = "none") +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         legend.position = "bottom", 
-        panel.spacing.y = unit(1.5, "lines")) +
+        #panel.spacing.y = unit(1.5, "lines")
+        ) +
   scale_color_brewer(palette = "Paired") +
-  scale_fill_brewer(palette = "Paired")
+  scale_fill_brewer(palette = "Paired") +
+  scale_y_continuous(expand = c(0.1, 0.1))
 plot(point.comp)
 
 ggsave(
   point.comp, 
   filename = "figures/mw-lw-comparisons_V2.tiff", 
-  dpi = 300, width = 7, height = 9
+  dpi = 300, width = 5, height = 7
 )
 
 
