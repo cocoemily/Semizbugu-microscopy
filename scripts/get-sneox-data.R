@@ -11,7 +11,7 @@ artifacts$Id_number = as.character(artifacts$Id_number)
 
 artifacts = artifacts %>% add_row(Id_number = "survey", location = "survey", Weathering_class = "strongly_weathered")
 
-files = list.files("data/Sneox-CSV")
+files = list.files("data/initial-microscope-data/Sneox-CSV")
 
 sensofar.data = data.frame(
   Id_number = character(0),

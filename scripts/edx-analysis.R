@@ -75,45 +75,45 @@ identify_element_peaks = function(data) {
 }
 
 
-p1.83.less = read_spectra_table("data/EDX-results/block/p1_83_less_spect_box.txt")
+p1.83.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/p1_83_less_spect_box.txt")
 p1.83.less$sample_num = "p1-83"
 p1.83.less$surface_condition = "less"
-p1.83.more = read_spectra_table("data/EDX-results/block/p1_83_more_spect_box.txt")
+p1.83.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/p1_83_more_spect_box.txt")
 p1.83.more$sample_num = "p1-83"
 p1.83.more$surface_condition = "more"
 
-p1.231.less = read_spectra_table("data/EDX-results/block/p1_231_less_spect_box.txt")
+p1.231.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/p1_231_less_spect_box.txt")
 p1.231.less$sample_num = "p1-231"
 p1.231.less$surface_condition = "less"
-p1.231.more = read_spectra_table("data/EDX-results/block/p1_231_more_spect_box.txt")
+p1.231.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/p1_231_more_spect_box.txt")
 p1.231.more$sample_num = "p1-231"
 p1.231.more$surface_condition = "more"
 
-p5.1777.less = read_spectra_table("data/EDX-results/block/p5_1777_less_spect_box.txt")
+p5.1777.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1777_less_spect_box.txt")
 p5.1777.less$sample_num = "p5-1777"
 p5.1777.less$surface_condition = "less"
-p5.1777.more = read_spectra_table("data/EDX-results/block/p5_1777_more_spect_box.txt")
+p5.1777.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1777_more_spect_box.txt")
 p5.1777.more$sample_num = "p5-1777"
 p5.1777.more$surface_condition = "more"
 
-p5.1843.less = read_spectra_table("data/EDX-results/block/p5_1843_less_spect_box.txt")
+p5.1843.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1843_less_spect_box.txt")
 p5.1843.less$sample_num = "p5-1843"
 p5.1843.less$surface_condition = "less"
-p5.1843.more = read_spectra_table("data/EDX-results/block/p5_1843_more_spect_box.txt")
+p5.1843.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1843_more_spect_box.txt")
 p5.1843.more$sample_num = "p5-1843"
 p5.1843.more$surface_condition = "more"
 
-p5.1962.less = read_spectra_table("data/EDX-results/block/p5_1962_less_spect_box.txt")
+p5.1962.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1962_less_spect_box.txt")
 p5.1962.less$sample_num = "p5-1962"
 p5.1962.less$surface_condition = "less"
-p5.1962.more = read_spectra_table("data/EDX-results/block/p5_1962_more_spect_box.txt")
+p5.1962.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/p5_1962_more_spect_box.txt")
 p5.1962.more$sample_num = "p5-1962"
 p5.1962.more$surface_condition = "more"
 
-survey.less = read_spectra_table("data/EDX-results/block/survey_less_spect_box.txt")
+survey.less = read_spectra_table("data/initial-microscope-data/EDX-results/block/survey_less_spect_box.txt")
 survey.less$sample_num = "s-survey"
 survey.less$surface_condition = "less"
-survey.more = read_spectra_table("data/EDX-results/block/survey_more_spect.txt")
+survey.more = read_spectra_table("data/initial-microscope-data/EDX-results/block/survey_more_spect.txt")
 survey.more$sample_num = "s-survey"
 survey.more$surface_condition = "more"
 
