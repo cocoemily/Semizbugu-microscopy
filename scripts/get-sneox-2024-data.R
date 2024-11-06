@@ -33,7 +33,9 @@ sensofar.data = data.frame(
   Spk = double(0), 
   Smr1 = double(0), 
   Smr2 = double(0), 
-  Vvv = double(0)
+  Vvv = double(0),
+  Vvc = double(0), 
+  Vv = double(0)
 )
 
 #different numbers of rows to skip for artifact 1843, need to find row with Name
@@ -70,5 +72,5 @@ for(f in files) {
     c(artifact.name, measurement.id, loc, wc, surface.class, sneox.clean)
 }
 
-sensofar.data[,6:19] = sapply(sensofar.data[,6:19], as.numeric)
+sensofar.data[,6:21] = sapply(sensofar.data[,6:21], as.numeric)
 

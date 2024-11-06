@@ -25,13 +25,13 @@ mw_measures = sensofar.data %>% filter(surface_class == "mw")
 lw_measures = sensofar.data %>% filter(surface_class == "lw")
 
 
-norm.mw = scale(mw_measures[,6:19])
+norm.mw = scale(mw_measures[,6:21])
 corr_mat = cor(norm.mw)
 p.mat = cor_pmat(norm.mw)
 ggcorrplot(corr_mat, type = "upper", 
            p.mat = p.mat, insig = "blank")
 
-norm.lw = scale(lw_measures[,6:19])
+norm.lw = scale(lw_measures[,6:21])
 lw.corr_mat = cor(norm.lw)
 p.mat.lw = cor_pmat(norm.lw)
 ggcorrplot(lw.corr_mat, type = "upper", 

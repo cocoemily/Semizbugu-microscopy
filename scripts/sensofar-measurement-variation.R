@@ -6,7 +6,7 @@ theme_set(theme_bw())
 
 source("scripts/get-sneox-2024-data.R")
 rm(list = setdiff(ls(), "sensofar.data"))
-parameters = colnames(sensofar.data[,6:19])
+parameters = colnames(sensofar.data[,6:21])
 
 
 ### variation in measurements within artifacts
@@ -25,13 +25,15 @@ param.cov = sensofar.data %>% group_by(Id_number, Weathering_class, surface_clas
     Spk = abs(sd(Spk)/mean(Spk)), 
     Smr1 = abs(sd(Smr1)/mean(Smr1)), 
     Smr2 = abs(sd(Smr2)/mean(Smr2)), 
-    Vvv = abs(sd(Vvv)/mean(Vvv))
+    Vvv = abs(sd(Vvv)/mean(Vvv)), 
+    Vvc = abs(sd(Vvc)/mean(Vvc)), 
+    Vv = abs(sd(Vv)/mean(Vv))
   ) %>% 
-  pivot_longer(c(4:17), names_to = "parameter", values_to = "CoV")
+  pivot_longer(c(4:19), names_to = "parameter", values_to = "CoV")
 
 ggplot(param.cov) +
-  geom_point(aes(x = Id_number, y = CoV, color = surface_class)) +
-  facet_wrap(~parameter) +
+  geom_col(aes(x = Id_number, y = CoV, fill = surface_class), position = "dodge2") +
+  facet_wrap(~parameter, scales = "free") +
   coord_flip()
 
 pca.cov = ggplot(param.cov %>% filter(parameter %in% c("Sq", "Smr2", "Ssk"))) +
@@ -71,16 +73,18 @@ param.var = sensofar.data %>% group_by(Id_number, Weathering_class, surface_clas
     Spk = var(Spk), 
     Smr1 = var(Smr1), 
     Smr2 = var(Smr2), 
-    Vvv = var(Vvv)
+    Vvv = var(Vvv), 
+    Vvc = var(Vvc), 
+    Vv = var(Vv)
   ) %>% 
-  pivot_longer(c(4:17), names_to = "parameter", values_to = "var")
+  pivot_longer(c(4:19), names_to = "parameter", values_to = "var")
 
 var.plot = ggplot(param.var) +
   geom_boxplot(aes(x = parameter, y = var, group = parameter)) +
-  geom_boxplot(data=param.var %>% filter(parameter %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+  geom_boxplot(data=param.var %>% filter(parameter %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
                aes(x = parameter, y = var, group = parameter), color = "red") +
-  facet_wrap(~surface_class)
+  facet_wrap(~surface_class, ncol = 1)
 ggsave(filename = "figures/SM_parameter-variation.png", plot = var.plot, 
-       dpi = 300, width = 8, height = 4)
+       dpi = 300, width = 5, height = 6)
 
 

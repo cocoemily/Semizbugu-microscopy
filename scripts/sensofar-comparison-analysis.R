@@ -5,15 +5,16 @@ library(ggprism)
 library(rcompanion)
 library(paletteer)
 library(rstatix)
+library(lme4)
 
 theme_set(theme_bw())
 
 source("scripts/get-sneox-2024-data.R")
 rm(list = setdiff(ls(), "sensofar.data"))
-parameters = colnames(sensofar.data[,6:19])
+parameters = colnames(sensofar.data[,6:21])
 
 sdata = sensofar.data  %>%
-  pivot_longer(cols = 6:19, names_to = "measurement", values_to = "value")
+  pivot_longer(cols = 6:21, names_to = "measurement", values_to = "value")
 sdata$Weathering_class = factor(sdata$Weathering_class, 
                                 levels = c("strongly_weathered", "mildly_weathered", "weakly_weathered"))
 
@@ -75,18 +76,18 @@ wc.all = compare_means(value ~ Weathering_class, group.by = "measurement",
                        method = "anova")
 ####mw-lw comparison####
 all.stats = compare_means(value ~ surface_class, group.by = c("Weathering_class", "measurement"), 
-                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
                           paired = T) %>%
-  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("measurement", "Weathering_class")) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), by = c("measurement", "Weathering_class")) %>%
   group_by(Weathering_class, measurement) %>%
   summarize(p.format = first(p.format), 
             max.y = max(value))
 
-all.mw.lw.wc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))) +
+all.mw.lw.wc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))) +
   geom_boxplot(aes(x = Weathering_class, y = value, 
                    group = interaction(surface_class, Weathering_class), 
                    color = interaction(surface_class, Weathering_class))) +
-  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
             mapping = aes(x = Weathering_class, y = max.y,label = paste0("p = ", p.format)),
             nudge_y = 0.5) +
   facet_wrap(~fct_rev(measurement), scales = "free", strip.position = "right", ncol = 1) +
@@ -101,18 +102,18 @@ plot(all.mw.lw.wc)
 #        dpi = 300, width = 5, height = 8)
 
 all.stats2 = compare_means(value ~ surface_class, group.by = c("location", "measurement"), 
-                           data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                           data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
                            paired = T) %>%
-  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("measurement", "location")) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), by = c("measurement", "location")) %>%
   group_by(location, measurement) %>%
   summarize(p.format = first(p.format), 
             max.y = max(value))
 
-all.mw.lw.loc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))) +
+all.mw.lw.loc = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))) +
   geom_boxplot(aes(x = location, y = value, 
                    group = interaction(surface_class, location), 
                    color = interaction(surface_class, location))) +
-  geom_text(data = all.stats2 %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+  geom_text(data = all.stats2 %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
             mapping = aes(x = location, y = max.y,label = paste0("p = ", p.format)),
             nudge_y = 0.5) +
   facet_wrap(~fct_rev(measurement), scales = "free", strip.position = "right", ncol = 1) +
@@ -128,9 +129,9 @@ plot(all.mw.lw.loc)
 
 
 #### weathered surface comparison ####
-sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
 sdata.sub$measurement = factor(sdata.sub$measurement, 
-                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
 
 table((sensofar.data %>% filter(surface_class == "mw"))$Weathering_class)
 table((sensofar.data %>% filter(surface_class == "mw"))$location)
@@ -154,7 +155,7 @@ mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw") %>% filter(location
   scale_color_brewer(palette = "Set1")
 plot(mwplot1)
 
-mwplot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>% filter(surface_class == "mw"), 
+mwplot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")) %>% filter(surface_class == "mw"), 
                  aes(x = location, y = value, 
                      group = location, 
                      color = location)) +
@@ -175,7 +176,7 @@ ggsave(plot = mwplot2,
        dpi = 300, width = 8, height = 7)
 
 ####by artifact####
-art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>%
+art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")) %>%
   mutate(measurement_id = paste0(Id_number, "_", measurement_number))
 
 #order by location
@@ -192,12 +193,12 @@ art.comp$Id_number = factor(art.comp$Id_number,
                                        "83","495", "1777", "1962", "survey"))
 
 art.comp$measurement = factor(art.comp$measurement , 
-         levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+         levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
 
 all.stats = compare_means(value ~ surface_class, group.by = c("Id_number", "Weathering_class", "measurement"), 
-                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), 
+                          data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
                           paired = F) %>%
-  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")), by = c("Id_number", "measurement", "Weathering_class")) %>%
+  left_join(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), by = c("Id_number", "measurement", "Weathering_class")) %>%
   #filter(surface_class == "mw") %>%
   group_by(Id_number, Weathering_class, measurement) %>%
   summarize(p.format = first(p.format), 
@@ -205,11 +206,11 @@ all.stats = compare_means(value ~ surface_class, group.by = c("Id_number", "Weat
             max.y = max(value))
 
 all.stats$measurement = factor(all.stats$measurement, 
-                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvv"))
+                               levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
 
 point.comp = ggplot(art.comp) +
   geom_boxplot(aes(x = Id_number, y = value, group = interaction(Id_number, surface_class), fill = interaction(surface_class, Weathering_class)), position = "dodge2") +
-  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvv")) %>% filter(p.signif != "ns"), 
+  geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")) %>% filter(p.signif != "ns"), 
             mapping = aes(x = Id_number, y = max.y, label = p.signif), size = 6) +
   facet_wrap( ~ measurement, scales = "free", ncol = 1, strip.position = "right") +
   guides(color = "none", fill = "none") +
@@ -277,13 +278,13 @@ smr2.comp = sensofar.data %>%
   pairwise_t_test(Smr2 ~ surface_class, p.adjust.method = "bonferroni") %>%
   select(-n1, -n2)
 
-plotNormalHistogram(sensofar.data$Vvv)
-summary(aov(Vvv ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
-# anova_test(data = sensofar.data, dv = Vvv, wid = measurement_number, 
+plotNormalHistogram(sensofar.data$Vvc)
+summary(aov(Vvc ~ surface_class * Weathering_class * location + Error(Id_number), data = sensofar.data))
+# anova_test(data = sensofar.data, dv = Vvc, wid = measurement_number, 
 #            between = surface_class, within = Id_number)
-vvv.comp = sensofar.data %>%
+Vvc.comp = sensofar.data %>%
   group_by(Weathering_class, Id_number) %>%
-  pairwise_t_test(Vvv ~ surface_class, p.adjust.method = "bonferroni") %>%
+  pairwise_t_test(Vvc ~ surface_class, p.adjust.method = "bonferroni") %>%
   select(-n1, -n2)
 
 

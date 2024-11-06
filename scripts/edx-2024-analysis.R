@@ -36,6 +36,8 @@ edx.data = data.frame(
   Fe = double(0)
 )
 
+#write_csv(edx.data, file = "data/SEM-data_2024/artifact-surfaces_weight-conc.csv", )
+
 elements = c("O", "Na", "Mg", "Al", "Si", "K", "Ca", "Ti", "Mn", "Fe")
 
 for(d in dirs) {
@@ -93,7 +95,30 @@ plot(point.comp)
 ggsave(
   point.comp, 
   filename = "figures/mw-lw-EDX_comparisons.tiff", 
-  dpi = 300, width = 5, height = 6
+  dpi = 300, width = 6.5, height = 5
 )
+
+art.comp2 = edx.long %>% filter(element %in% c("Fe", "Mn", "Si", "O", "Ti", "K", "Ca"))
+art.comp2$Id_number = factor(art.comp2$Id_number,
+                            levels = c("231", "336",
+                                       "791","1556","1843",
+                                       "83","495", "1777", "1962", "survey"))
+art.comp2$element = factor(art.comp2$element, levels = c("Fe", "Mn", "Si", "O", "Ti", "K", "Ca"))
+
+all.stats2 = compare_means(weight_percent ~ surface_class, group.by = c("Id_number", "Weathering_class", "element"), 
+                          data = art.comp2, paired = T) 
+
+point.comp2 = ggplot(art.comp2) +
+  geom_col(aes(x = Id_number, y = weight_percent, group = interaction(Id_number, surface_class), fill = interaction(surface_class, Weathering_class)), position = "dodge2") +
+  facet_wrap( ~ element, scales = "free", ncol = 1, strip.position = "right") +
+  guides(color = "none", fill = "none") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "bottom", 
+        #panel.spacing.y = unit(1.5, "lines")
+  ) +
+  labs(y = "Weight Concentration %") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired")
+plot(point.comp2)
 
 
