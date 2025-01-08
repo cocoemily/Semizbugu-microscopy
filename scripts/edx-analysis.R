@@ -145,8 +145,8 @@ compare_spectra = function(ldata, mdata) {
   plot = ggplot(mapping = aes(x = Energy, y = count)) +
     geom_vline(data = iron, aes(xintercept = energy, color = "iron"), size = 0.25) +
     geom_vline(data = manganese, aes(xintercept = energy, color = "manganese"), size = 0.25) +
-    geom_area(data = mdata, alpha = 0.5, mapping = aes(fill = "more weathered")) +
-    geom_area(data = ldata, alpha = 0.5, mapping = aes(fill = "less weathered")) +
+    geom_area(data = mdata, alpha = 0.75, mapping = aes(fill = "more weathered")) +
+    geom_area(data = ldata, alpha = 0.75, mapping = aes(fill = "less weathered")) +
     scale_fill_manual(values = pal2) +
     scale_color_manual(values = pal1) +
     labs(fill = "surface condition", color = "element", x = "Energy (keV)") +
@@ -173,8 +173,8 @@ p1 = ggarrange(
 )
 plot(p1)
 
-ggsave(filename = "figures/spot-scan-comparison.tiff", p1, 
-       dpi = 300, height = 9, width = 12)
+ggsave(filename = "figures/SM_spot-scan-comparison.tiff", p1, 
+       dpi = 300, height = 12, width = 12)
 
 
 ####compare counts####

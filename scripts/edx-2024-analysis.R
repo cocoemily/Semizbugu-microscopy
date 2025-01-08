@@ -73,6 +73,8 @@ art.comp$Id_number = factor(art.comp$Id_number,
                                        "791","1556","1843",
                                        "83","495", "1777", "1962", "survey"))
 art.comp$element = factor(art.comp$element, levels = c("Fe", "Mn", "Si", "Al"))
+art.comp$Weathering_class = factor(art.comp$Weathering_class, 
+                                   levels = c("strongly_weathered", "mildly_weathered", "weakly_weathered"))
 
 all.stats = compare_means(weight_percent ~ surface_class, group.by = c("Id_number", "Weathering_class", "element"), 
                           data = art.comp, paired = T) 
@@ -98,12 +100,14 @@ ggsave(
   dpi = 300, width = 6.5, height = 5
 )
 
-art.comp2 = edx.long %>% filter(element %in% c("Fe", "Mn", "Si", "O", "Ti", "K", "Ca"))
+art.comp2 = edx.long %>% filter(element %in% c("Fe", "Mn", "Si", "Al", "K", "Ca"))
 art.comp2$Id_number = factor(art.comp2$Id_number,
-                            levels = c("231", "336",
-                                       "791","1556","1843",
-                                       "83","495", "1777", "1962", "survey"))
-art.comp2$element = factor(art.comp2$element, levels = c("Fe", "Mn", "Si", "O", "Ti", "K", "Ca"))
+                            levels = c("231", "336", #weakly weathered
+                                       "791","1556","1843", #mildly weathered
+                                       "83","495", "1777", "1962", "survey")) #strongly weathered
+art.comp2$element = factor(art.comp2$element, levels = c("Fe", "Mn", "Si", "Al", "K", "Ca"))
+art.comp2$Weathering_class = factor(art.comp2$Weathering_class, 
+                                   levels = c("weakly_weathered", "mildly_weathered", "strongly_weathered"))
 
 all.stats2 = compare_means(weight_percent ~ surface_class, group.by = c("Id_number", "Weathering_class", "element"), 
                           data = art.comp2, paired = T) 
@@ -121,4 +125,8 @@ point.comp2 = ggplot(art.comp2) +
   scale_fill_brewer(palette = "Paired")
 plot(point.comp2)
 
-
+ggsave(
+  point.comp2, 
+  filename = "figures/mw-lw-EDX_comparisons_Ca-K.tiff", 
+  dpi = 300, width = 6.5, height = 7
+)

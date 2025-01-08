@@ -16,8 +16,18 @@ parameters = colnames(sensofar.data[,6:21])
 sdata = sensofar.data  %>%
   pivot_longer(cols = 6:21, names_to = "measurement", values_to = "value")
 sdata$Weathering_class = factor(sdata$Weathering_class, 
-                                levels = c("strongly_weathered", "mildly_weathered", "weakly_weathered"))
+                                levels = c("weakly_weathered", "mildly_weathered", "strongly_weathered"))
 
+sdata$unit = ifelse(sdata$measurement == "Sq", 
+                    as.character(expression(paste("Sq (", mu, "m)"))), 
+                    ifelse(sdata$measurement == "Spc", 
+                           as.character(expression(paste("Spc (1/", mu, "m)"))),
+                           ifelse(sdata$measurement == "Smr2", 
+                                  as.character("Smr2 ('%')"), 
+                                  ifelse(sdata$measurement == "Vvc", 
+                                         as.character(expression(paste("Vvc (",mu, "m/", mu, "m)"))), "Ssk"))) 
+                    
+)
 
 ####order artifacts by values####
 plot_by_param_value = function(param) {
@@ -132,15 +142,27 @@ plot(all.mw.lw.loc)
 sdata.sub = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
 sdata.sub$measurement = factor(sdata.sub$measurement, 
                                levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
+sdata.sub$unit = factor(sdata.sub$unit, 
+                    levels = c(
+                      as.character(expression(paste("Sq (", mu, "m)"))), 
+                      as.character(expression(paste("Spc (1/", mu, "m)"))),
+                      as.character("Smr2 ('%')"),
+                      "Ssk", 
+                      as.character(expression(paste("Vvc (",mu, "m/", mu, "m)")))
+                    ))
+
 
 table((sensofar.data %>% filter(surface_class == "mw"))$Weathering_class)
 table((sensofar.data %>% filter(surface_class == "mw"))$location)
+
+mw_colors = RColorBrewer::brewer.pal(6, "Paired")[c(2,4,6)]
 
 mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw") %>% filter(location != "survey"), 
                  aes(x = Weathering_class, y = value, 
                      group = Weathering_class, 
                      color = Weathering_class)) +
   geom_boxplot() +
+  geom_jitter(alpha = 0.5)+
   stat_compare_means(method = "wilcox.test", comparisons = list( 
     c("strongly_weathered", "mildly_weathered"), 
     c("strongly_weathered", "weakly_weathered"), 
@@ -148,20 +170,23 @@ mwplot1 = ggplot(sdata.sub %>% filter(surface_class == "mw") %>% filter(location
     label.x.npc = "center", vjust = 0.6, #hjust = 1, 
     label = "p.signif", hide.ns = T) +
   #geom_hline(aes(yintercept = 0), color = "grey20", linetype = 2) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 2) +
+  facet_wrap(~ unit, scales = "free", strip.position = "right", ncol = 2, 
+             labeller = label_parsed) +
   scale_x_discrete(labels = w.labs) +
   labs(x = "degree of weathering", color = "weathering class") +
   theme(legend.position = "none", panel.spacing.x = unit(5, "lines")) +
-  scale_color_brewer(palette = "Set1")
+  scale_color_manual(values = mw_colors)
 plot(mwplot1)
 
-mwplot2 = ggplot(sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")) %>% filter(surface_class == "mw"), 
+mwplot2 = ggplot(sdata.sub %>% filter(surface_class == "mw"), 
                  aes(x = location, y = value, 
                      group = location, 
                      color = location)) +
   geom_boxplot() +
+  geom_jitter(alpha = 0.5)+
   stat_compare_means(method = "anova", label.x.npc = "center", vjust = 1, hjust = 1) +
-  facet_wrap(~measurement, scales = "free", strip.position = "right", ncol = 2) +
+  facet_wrap(~unit, scales = "free", strip.position = "right", ncol = 2, 
+             labeller = label_parsed) +
   labs(x = "location")  +
   theme(legend.position = "none", panel.spacing.x = unit(5, "lines"), 
         axis.text.x = element_text(size = 7)) +
@@ -188,12 +213,20 @@ art.comp = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc"
 
 #order by weathering stage
 art.comp$Id_number = factor(art.comp$Id_number,
-                            levels = c("231", "336",
-                                       "791","1556","1843",
-                                       "83","495", "1777", "1962", "survey"))
+                            levels = c("231", "336", #weakly weathered
+                                       "791","1556","1843", #mildly weathered
+                                       "83","495", "1777", "1962", "survey")) #strongly weathered
 
 art.comp$measurement = factor(art.comp$measurement , 
-         levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
+                              levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
+art.comp$unit = factor(art.comp$unit, 
+                        levels = c(
+                          as.character(expression(paste("Sq (", mu, "m)"))), 
+                          as.character(expression(paste("Spc (1/", mu, "m)"))),
+                          as.character("Smr2 ('%')"),
+                          "Ssk", 
+                          as.character(expression(paste("Vvc (",mu, "m/", mu, "m)")))
+                        ))
 
 all.stats = compare_means(value ~ surface_class, group.by = c("Id_number", "Weathering_class", "measurement"), 
                           data = sdata %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")), 
@@ -204,6 +237,24 @@ all.stats = compare_means(value ~ surface_class, group.by = c("Id_number", "Weat
   summarize(p.format = first(p.format), 
             p.signif = first(p.signif),
             max.y = max(value))
+all.stats$unit = ifelse(all.stats$measurement == "Sq", 
+                    as.character(expression(paste("Sq (", mu, "m)"))), 
+                    ifelse(all.stats$measurement == "Spc", 
+                           as.character(expression(paste("Spc (1/", mu, "m)"))),
+                           ifelse(all.stats$measurement == "Smr2", 
+                                  as.character("Smr2 ('%')"), 
+                                  ifelse(all.stats$measurement == "Vvc", 
+                                         as.character(expression(paste("Vvc (",mu, "m/", mu, "m)"))), "Ssk"))) 
+                    
+)
+all.stats$unit = factor(all.stats$unit, 
+                       levels = c(
+                         as.character(expression(paste("Sq (", mu, "m)"))), 
+                         as.character(expression(paste("Spc (1/", mu, "m)"))),
+                         as.character("Smr2 ('%')"),
+                         "Ssk", 
+                         as.character(expression(paste("Vvc (",mu, "m/", mu, "m)")))
+                       ))
 
 all.stats$measurement = factor(all.stats$measurement, 
                                levels = c("Sq", "Spc", "Smr2", "Ssk", "Vvc"))
@@ -212,14 +263,15 @@ point.comp = ggplot(art.comp) +
   geom_boxplot(aes(x = Id_number, y = value, group = interaction(Id_number, surface_class), fill = interaction(surface_class, Weathering_class)), position = "dodge2") +
   geom_text(data = all.stats %>% filter(measurement %in% c("Sq", "Spc", "Smr2", "Ssk", "Vvc")) %>% filter(p.signif != "ns"), 
             mapping = aes(x = Id_number, y = max.y, label = p.signif), size = 6) +
-  facet_wrap( ~ measurement, scales = "free", ncol = 1, strip.position = "right") +
+  facet_wrap( ~ unit, scales = "free", ncol = 1, strip.position = "right", 
+              labeller = label_parsed) +
   guides(color = "none", fill = "none") +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         legend.position = "bottom", 
         #panel.spacing.y = unit(1.5, "lines")
-        ) +
-  scale_color_brewer(palette = "Paired") +
+  ) +
+  #scale_color_brewer(palette = "Paired") +
   scale_fill_brewer(palette = "Paired") +
   scale_y_continuous(expand = c(0.1, 0.1))
 plot(point.comp)
